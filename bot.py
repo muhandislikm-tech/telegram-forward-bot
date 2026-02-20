@@ -1,12 +1,17 @@
 import telebot
 import os
 
-TOKEN = os.environ.get("TOKEN")
+TOKEN = os.getenv("TOKEN")
+GROUP_ID = int(os.getenv("GROUP_ID"))
 
 bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(func=lambda message: True)
-def get_id(message):
-    bot.reply_to(message, f"Chat ID: {message.chat.id}")
+def forward_to_group(message):
+    bot.forward_message(
+        GROUP_ID,
+        message.chat.id,
+        message.message_id
+    )
 
-bot.polling()
+bot.infinity_polling()
