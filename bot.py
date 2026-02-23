@@ -6,19 +6,30 @@ GROUP_ID = int(os.getenv("GROUP_ID"))
 
 bot = telebot.TeleBot(TOKEN)
 
-# User yozsa → guruhga yuboradi (ID bilan)
+# 1️⃣ User yozsa → guruhga ism + username + ID bilan yuboradi
 @bot.message_handler(func=lambda message: message.chat.type == "private")
 def forward_to_group(message):
-    text = f"User ID: {message.chat.id}\n\n{message.text}"
+    name = message.from_user.first_name or ""
+    username = f"@{message.from_user.username}" if message.from_user.username else "username yo‘q"
+    user_id = message.chat.id
+
+    text = (
+        f"👤 Ism: {name}\n"
+        f"🔗 Username: {username}\n"
+        f"🆔 User ID: {user_id}\n\n"
+        f"💬 Xabar:\n{message.text}"
+    )
+
     bot.send_message(GROUP_ID, text)
 
-# Guruhda reply qilinsa → userga qaytaradi
+# 2️⃣ Guruhda reply qilinsa → userga qaytaradi
 @bot.message_handler(func=lambda message: message.chat.id == GROUP_ID and message.reply_to_message)
 def reply_to_user(message):
     original_text = message.reply_to_message.text
-    
+
     if "User ID:" in original_text:
-        user_id = int(original_text.split("\n")[0].replace("User ID: ", ""))
+        user_id_line = [line for line in original_text.split("\n") if "User ID:" in line][0]
+        user_id = int(user_id_line.replace("🆔 User ID: ", ""))
         bot.send_message(user_id, message.text)
 
 bot.infinity_polling()
