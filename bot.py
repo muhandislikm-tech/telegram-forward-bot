@@ -6,23 +6,19 @@ GROUP_ID = int(os.getenv("GROUP_ID"))
 
 bot = telebot.TeleBot(TOKEN)
 
-# 1) User yozsa → guruhga forward
+# User yozsa → guruhga yuboradi (ID bilan)
 @bot.message_handler(func=lambda message: message.chat.type == "private")
 def forward_to_group(message):
-    bot.forward_message(
-        GROUP_ID,
-        message.chat.id,
-        message.message_id
-    )
+    text = f"User ID: {message.chat.id}\n\n{message.text}"
+    bot.send_message(GROUP_ID, text)
 
-# 2) Guruhda reply qilinsa → userga qaytar
+# Guruhda reply qilinsa → userga qaytaradi
 @bot.message_handler(func=lambda message: message.chat.id == GROUP_ID and message.reply_to_message)
 def reply_to_user(message):
-    original = message.reply_to_message
-
-    # Forward qilingan xabarda forward_from bo‘ladi
-    if original.forward_from:
-        user_id = original.forward_from.id
+    original_text = message.reply_to_message.text
+    
+    if "User ID:" in original_text:
+        user_id = int(original_text.split("\n")[0].replace("User ID: ", ""))
         bot.send_message(user_id, message.text)
 
 bot.infinity_polling()
